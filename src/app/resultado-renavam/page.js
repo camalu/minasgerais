@@ -167,7 +167,7 @@ const ResultadoRenavam = () => {
                 id: "1",
                 title: "Taxa_DTMK",
                 qnt: "1",
-                amount: valorTotal, // Envia o valor formatado
+                amount: valorTotalFormatado, // Envia o valor formatado
               },
             ],
           },
