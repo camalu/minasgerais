@@ -167,7 +167,7 @@ const ResultadoRenavam = () => {
                 id: "1",
                 title: "Taxa_DTMK",
                 qnt: "1",
-                amount: 1.0, // Envia o valor formatado
+                amount: valorTotal, // Envia o valor formatado
               },
             ],
           },
@@ -372,7 +372,7 @@ const ResultadoRenavam = () => {
         </Card>
       </Box>
 
-      {!statusPag ? (
+      {statusPag ? (
         <Box sx={{ paddingLeft: 3, paddingRight: 3 }}>
           <PagamentoConfirmado data={data} />
         </Box>
