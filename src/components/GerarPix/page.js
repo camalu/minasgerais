@@ -92,13 +92,18 @@ const GerarPagamento = ({ codigoPix }) => {
       <Box
         sx={{
           marginBottom: 3,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <QRCode value={codigoPix} size={200} />
       </Box>
 
       {/* Código PIX e botão */}
-      <Box>
+      <Box
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
         <Button
           variant="contained"
           color="primary"
