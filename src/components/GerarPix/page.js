@@ -10,6 +10,7 @@ import {
   StepLabel,
 } from "@mui/material";
 import QRCode from "react-qr-code";
+import { ReportProblem } from "@mui/icons-material";
 
 const GerarPagamento = ({ codigoPix }) => {
   const [copiado, setCopiado] = useState(false);
@@ -127,10 +128,15 @@ const GerarPagamento = ({ codigoPix }) => {
           textAlign: "left",
           color: "#555",
           marginTop: 3,
+          display: "flex",
+          gap: 2,
         }}
       >
-        Após a confirmação do pagamento, a tela será atualizada permitindo a
-        geração do comprovante de pagamento.
+        <ReportProblem sx={{ color: "#ed6c02", fontSize: "1.4rem" }} />
+        <Box>
+          Após a confirmação do pagamento, a tela será atualizada permitindo a
+          geração do comprovante de pagamento.
+        </Box>
       </Box>
     </Box>
   );

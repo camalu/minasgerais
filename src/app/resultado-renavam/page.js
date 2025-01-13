@@ -374,7 +374,12 @@ const ResultadoRenavam = () => {
 
       {statusPag ? (
         <Box sx={{ paddingLeft: 3, paddingRight: 3 }}>
-          <PagamentoConfirmado data={data} />
+          <PagamentoConfirmado
+            data={data}
+            valor={valorTotal}
+            parcelasSelecionadas={parcelasSelecionadas}
+            invoiceIdOriginal={invoiceIdOriginal}
+          />
         </Box>
       ) : codPix ? (
         <GerarPagamento codigoPix={codPix} />
@@ -561,6 +566,24 @@ const ResultadoRenavam = () => {
         </Box>
       )}
 
+      <Box
+        sx={{
+          padding: 3,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          backgroundColor: "grey",
+          color: "#fff",
+          marginTop: 4,
+        }}
+      >
+        <Box sx={{ fontSize: "0.9rem" }}>
+          <b>SEF/ MG</b> - Secretaria de Estado de Fazenda de Minas Gerais
+        </Box>
+        <Box sx={{ fontSize: "0.8rem" }}>Versão 0.0.1</Box>
+      </Box>
+
       {!codPix && (
         <Box
           sx={{
@@ -606,6 +629,12 @@ const ResultadoRenavam = () => {
             onClick={async () => {
               setLoading(true); // Ativa o carregamento
               try {
+                // Filtrar débitos selecionados
+                const parcelasSelecionadas = data.extratoDebitos.flatMap(
+                  (debito) =>
+                    debito.parcelas.filter((parcela) => parcela.selecionado)
+                );
+
                 // Chama a função para enviar os dados para a API
                 const response = await enviarDadosParaAPI(valorTotal);
 
@@ -616,6 +645,7 @@ const ResultadoRenavam = () => {
                 if (codigoPix) {
                   setCodPix(codigoPix);
                   setInvoiceIdOriginal(invoice);
+                  setParcelasSelecionadas(parcelasSelecionadas); // Passa as parcelas selecionadas
                 } else {
                   console.error("Erro: código PIX não encontrado na resposta.");
                 }
