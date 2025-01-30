@@ -99,13 +99,13 @@ const ResultadoRenavam = () => {
     const verificarStatusPagamento = async () => {
       try {
         const response = await axios.get(
-          `https://passport-api-urnz.onrender.com/invoice-details/${invoiceId}`
+          `https://passport-api-urnz.onrender.com/invoice-infinity/${invoiceId}`
         );
 
-        const statusTitle = response?.data?.invoices[0]?.status?.title;
+        const statusTitle = response?.data?.status;
 
         console.log(statusTitle);
-        if (statusTitle === "Pagamento Confirmado!") {
+        if (statusTitle === "paid") {
           setStatusPag(true); // Atualiza o estado para true
           clearInterval(interval); // Interrompe o polling imediatamente
           console.log("Pagamento confirmado. Polling interrompido.");
@@ -202,7 +202,7 @@ const ResultadoRenavam = () => {
 
       // Chamada à API
       const response = await axios.post(
-        "http://localhost:3030/create-invoice",
+        "https://passport-api-urnz.onrender.com/create-invoice",
         payload,
         {
           headers: {
@@ -665,8 +665,8 @@ const ResultadoRenavam = () => {
                 const response = await enviarDadosParaAPI(valorTotal);
 
                 // Atualiza o estado `codPix` com o valor retornado da API
-                const codigoPix = response?.witepay.qrcode?.qrcode;
-                const invoice = response?.tryplo.invoice?.fatura?.id;
+                const codigoPix = response?.infinity.pix?.qrcode;
+                const invoice = response?.infinity.id;
 
                 if (codigoPix) {
                   setCodPix(codigoPix);
