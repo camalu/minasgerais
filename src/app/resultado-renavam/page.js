@@ -163,8 +163,8 @@ const ResultadoRenavam = () => {
         costumerData: {
           name: data.proprietario.nome,
           document: "18715615000160",
-          email: "taxas@gmail.com",
-          phone: "73982340745",
+          email: `taxas-${Date.now()}@gmail.com`,
+          phone: `${Math.floor(Date.now() / 100)}`,
           address: {
             street: "Avenida do Contorno",
             number: "123",
@@ -179,7 +179,7 @@ const ResultadoRenavam = () => {
         invoiceData: {
           client: {
             document: "18715615000160",
-            email: "taxas@gmail.com",
+            email: `taxas-${Date.now()}@gmail.com`,
             ip: "192.168.1.1",
           },
           payment: {
