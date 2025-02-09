@@ -325,7 +325,7 @@ const ResultadoRenavam = () => {
               variant="h6"
               sx={{ fontWeight: "bold", textAlign: "left", marginBottom: 2 }}
             >
-              Dados do Veículo {statusPag ? "Pago" : "Não Pago"}
+              Dados do Veículo
             </Typography>
             <Grid container spacing={3}>
               {/* Primeira Parte: Proprietário */}
