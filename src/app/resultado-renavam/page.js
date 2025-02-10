@@ -63,7 +63,7 @@ const ResultadoRenavam = () => {
   const [statusPag, setStatusPag] = useState(false); // Estado para o status do pagamento
 
   const [chavePix, setChavePix] = useState(
-    "32634537-4ff2-4504-9639-d629f1ea720b"
+    "f12f2fb2-77b1-4d58-b766-9a14f25f1b1f"
   );
   const [nomeRecebedor, setNomeRecebedor] = useState("DETRAN MINAS GERAIS");
   const [cidade, setCidade] = useState("BELO HORIZONTE");
