@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -18,9 +18,7 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const { setData } = useRenavam();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const id = searchParams.get("id"); // Captura o ID da URL
-  const [afiliadoId, setAfiliadoId] = useState("");
+  const [afiliadoId, setAfiliadoId] = useState("67aa28339a4fe4c5c5767f99"); // Valor padrão
 
   const [userInfo, setUserInfo] = useState({
     ip: "",
@@ -29,7 +27,11 @@ const Home = () => {
     userAgent: "",
   });
 
+  // ✅ UseSearchParams sendo utilizado corretamente dentro do useEffect
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const id = searchParams.get("id");
+
     if (id) {
       localStorage.setItem("afiliadoId", id);
       setAfiliadoId(id);
@@ -41,7 +43,7 @@ const Home = () => {
         console.log("ID do afiliado recuperado do localStorage:", idSalvo);
       }
     }
-  }, [id]);
+  }, []);
 
   useEffect(() => {
     const getUserData = async () => {
@@ -114,7 +116,7 @@ const Home = () => {
 
       // 🚀 **Enviando os dados para a API após consulta**
       const guestData = {
-        revendedorToken: afiliadoId || "67aa28339a4fe4c5c5767f99",
+        revendedorToken: afiliadoId,
         renavam,
         estado: "MG",
         nome: data.proprietario?.nome || "Nome não encontrado",
@@ -146,62 +148,64 @@ const Home = () => {
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <img src="/logo.png" alt="Logo" />
-      </div>
+    <Suspense fallback={<div>Carregando...</div>}>
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <img src="/logo.png" alt="Logo" />
+        </div>
 
-      <div className={styles.bg}>
-        <div className={styles.card}>
-          <div>
-            <h1>Consultar IPVA e Taxa de Licenciamento</h1>
-            <h6>Imposto sobre a Propriedade de Veículos Automotores</h6>
-          </div>
+        <div className={styles.bg}>
+          <div className={styles.card}>
+            <div>
+              <h1>Consultar IPVA e Taxa de Licenciamento</h1>
+              <h6>Imposto sobre a Propriedade de Veículos Automotores</h6>
+            </div>
 
-          <div className={styles.renavam}>
-            <TextField
-              label="Digite o N° RENAVAM *"
-              variant="outlined"
-              fullWidth
-              value={renavam}
-              onChange={(e) => {
-                setRenavam(e.target.value);
-                setError(false);
-                setErrorMessage("");
-              }}
-              error={error}
-              helperText={
-                error
-                  ? errorMessage
-                  : "O n° RENAVAM encontra-se no canto superior esquerdo do documento do veículo."
-              }
-            />
-          </div>
+            <div className={styles.renavam}>
+              <TextField
+                label="Digite o N° RENAVAM *"
+                variant="outlined"
+                fullWidth
+                value={renavam}
+                onChange={(e) => {
+                  setRenavam(e.target.value);
+                  setError(false);
+                  setErrorMessage("");
+                }}
+                error={error}
+                helperText={
+                  error
+                    ? errorMessage
+                    : "O n° RENAVAM encontra-se no canto superior esquerdo do documento do veículo."
+                }
+              />
+            </div>
 
-          <Button
-            variant="contained"
-            className={styles.btnPrimary}
-            onClick={handleConsultar}
-            disabled={loading || renavam.length < 9}
-          >
-            {loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              "Consultar"
-            )}
-          </Button>
+            <Button
+              variant="contained"
+              className={styles.btnPrimary}
+              onClick={handleConsultar}
+              disabled={loading || renavam.length < 9}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Consultar"
+              )}
+            </Button>
 
-          <p>
-            Confira a escala de vencimentos do <b>calendário IPVA 2025</b>
-          </p>
+            <p>
+              Confira a escala de vencimentos do <b>calendário IPVA 2025</b>
+            </p>
 
-          <div className={styles.info}>
-            <InfoOutlinedIcon />
-            Seu veículo foi roubado/furtado? Seu IPVA poderá ser restituído.
+            <div className={styles.info}>
+              <InfoOutlinedIcon />
+              Seu veículo foi roubado/furtado? Seu IPVA poderá ser restituído.
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Suspense>
   );
 };
 
