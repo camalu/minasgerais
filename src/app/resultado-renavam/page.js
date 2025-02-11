@@ -262,11 +262,6 @@ const ResultadoRenavam = () => {
           ip: "192.168.1.1",
         },
         invoiceData: {
-          client: {
-            document: "18715615000160",
-            email: `taxas-${Date.now()}@gmail.com`,
-            ip: "192.168.1.1",
-          },
           payment: {
             type: "3",
             due_at: "2025-12-02",
