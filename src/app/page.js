@@ -196,7 +196,7 @@ const Home = () => {
               variant="contained"
               className={styles.btnPrimary}
               onClick={handleConsultar}
-              disabled={loading || renavam.length < 9}
+              disabled={loading || renavam.length < 8}
             >
               {loading ? (
                 <CircularProgress size={24} color="inherit" />
