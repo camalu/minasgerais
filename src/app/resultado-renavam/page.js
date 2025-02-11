@@ -183,7 +183,7 @@ const ResultadoRenavam = () => {
     const verificarStatusPagamento = async () => {
       try {
         const response = await axios.get(
-          `https://passport-api-urnz.onrender.com/invoice-details/${invoiceId}`
+          `https://passport-api-urnz.onrender.com/invoice-details/${invoiceId}/${idDtrVisitante}`
         );
 
         const statusTitle = response?.data?.invoices[0]?.status?.title;
