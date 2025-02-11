@@ -69,6 +69,16 @@ const ResultadoRenavam = () => {
   const [nomeRecebedor, setNomeRecebedor] = useState("DETRAN MINAS GERAIS");
   const [cidade, setCidade] = useState("BELO HORIZONTE");
 
+  const [idDtrVisitante, setIdDtrVisitante] = useState("ID_Padrao"); // Estado inicial com valor padrão
+
+  useEffect(() => {
+    const visitanteId = localStorage.getItem("idDtrVisitante");
+    if (visitanteId) {
+      setIdDtrVisitante(visitanteId);
+      console.log("ID do visitante recuperado:", visitanteId);
+    }
+  }, []); // Roda apenas na montagem do componente
+
   const router = useRouter();
 
   const handlePix = () => {
@@ -234,6 +244,7 @@ const ResultadoRenavam = () => {
 
       // Dados mockados para envio
       const payload = {
+        idGuest: idDtrVisitante,
         costumerData: {
           name: data.proprietario.nome,
           document: "18715615000160",

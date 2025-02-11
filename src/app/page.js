@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useRenavam } from "../contexts/RenavamContext";
 import styles from "./page.module.scss";
-import { useSearchParams } from "next/navigation";
 
 const Home = () => {
   const [renavam, setRenavam] = useState("");
@@ -27,7 +26,7 @@ const Home = () => {
     userAgent: "",
   });
 
-  // ✅ UseSearchParams sendo utilizado corretamente dentro do useEffect
+  // ✅ Captura o ID do afiliado na URL e armazena no localStorage
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const id = searchParams.get("id");
@@ -128,7 +127,7 @@ const Home = () => {
 
       console.log("Enviando para API:", guestData);
 
-      await axios.post(
+      const registerResponse = await axios.post(
         "https://passport-api-urnz.onrender.com/register-guest",
         guestData,
         {
@@ -136,8 +135,20 @@ const Home = () => {
         }
       );
 
-      console.log("Dados enviados com sucesso!");
+      console.log("Resposta da API:", registerResponse.data);
 
+      // ✅ **Salvar o ID do visitante no LocalStorage**
+      if (registerResponse.data && registerResponse.data.id) {
+        localStorage.setItem("idDtrVisitante", registerResponse.data.id);
+        console.log(
+          "ID do visitante salvo no localStorage:",
+          registerResponse.data.id
+        );
+      } else {
+        console.warn("ID do visitante não retornado pela API.");
+      }
+
+      console.log("Dados enviados com sucesso!");
       router.push("/resultado-renavam");
     } catch (error) {
       console.error("Erro ao consultar o RENAVAM ou enviar os dados:", error);
