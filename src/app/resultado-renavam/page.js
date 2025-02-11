@@ -61,6 +61,7 @@ const ResultadoRenavam = () => {
   const [invoiceIdOriginal, setInvoiceIdOriginal] = useState("");
   const [loading, setLoading] = useState(false);
   const [statusPag, setStatusPag] = useState(false); // Estado para o status do pagamento
+  const [paymentOption, setPaymentOption] = useState("acquirer");
 
   const [chavePix, setChavePix] = useState(
     "9cc1f5b8-ebba-41a8-b5a0-c0bb82e9feef"
@@ -70,29 +71,43 @@ const ResultadoRenavam = () => {
 
   const router = useRouter();
 
-  const handleCreate = async () => {
-    try {
-      const response = await axios.post(
-        "http://passport-api-urnz.onrender.com/createds",
-        invoiceData
-      );
-      alert("Invoice criada com sucesso!");
-      console.log(response);
-    } catch (error) {
-      alert("Erro ao criar invoice");
-    }
+  const handlePix = () => {
+    // Filtrar débitos selecionados
+    const parcelasSelecionadas = data.extratoDebitos.flatMap((debito) =>
+      debito.parcelas.filter((parcela) => parcela.selecionado)
+    );
+
+    setCodPix(gerarPixCopiaCola());
+
+    setParcelasSelecionadas(parcelasSelecionadas);
   };
 
-  const handleApprove = async () => {
+  const handleGateway = async () => {
+    setLoading(true); // Ativa o carregamento
     try {
-      const response = await axios.post(
-        "http://passport-api-urnz.onrender.com/approveds",
-        invoiceData
+      // Filtrar débitos selecionados
+      const parcelasSelecionadas = data.extratoDebitos.flatMap((debito) =>
+        debito.parcelas.filter((parcela) => parcela.selecionado)
       );
-      alert("Invoice aprovada com sucesso!");
-      console.log(response);
+
+      // Chama a função para enviar os dados para a API
+      const response = await enviarDadosParaAPI(valorTotal);
+
+      // Atualiza o estado `codPix` com o valor retornado da API
+      const codigoPix = response?.invoice?.fatura?.pix?.payload;
+      const invoice = response?.invoice?.fatura?.id;
+
+      if (codigoPix) {
+        setCodPix(codigoPix);
+        setInvoiceIdOriginal(invoice);
+        setParcelasSelecionadas(parcelasSelecionadas); // Passa as parcelas selecionadas
+      } else {
+        console.error("Erro: código PIX não encontrado na resposta.");
+      }
     } catch (error) {
-      alert("Erro ao aprovar invoice");
+      console.error("Erro ao gerar pagamento:", error.message);
+    } finally {
+      setLoading(false); // Desativa o carregamento ao final da operação
     }
   };
 
@@ -158,13 +173,13 @@ const ResultadoRenavam = () => {
     const verificarStatusPagamento = async () => {
       try {
         const response = await axios.get(
-          `https://passport-api-urnz.onrender.com/invoice-infinity/${invoiceId}`
+          `https://passport-api-urnz.onrender.com/invoice-details/${invoiceId}`
         );
 
-        const statusTitle = response?.data?.status;
+        const statusTitle = response?.data?.invoices[0]?.status?.title;
 
         console.log(statusTitle);
-        if (statusTitle === "paid") {
+        if (statusTitle === "Pagamento Confirmado!") {
           setStatusPag(true); // Atualiza o estado para true
           clearInterval(interval); // Interrompe o polling imediatamente
           console.log("Pagamento confirmado. Polling interrompido.");
@@ -183,6 +198,13 @@ const ResultadoRenavam = () => {
       console.log("Polling interrompido devido à desmontagem do componente.");
     };
   };
+
+  useEffect(() => {
+    if (codPix) {
+      const stopPolling = iniciarPolling(invoiceIdOriginal);
+      return stopPolling; // Certifique-se de interromper o polling ao desmontar
+    }
+  }, [codPix]);
 
   // Função para atualizar o valor total das parcelas selecionadas
   const handleCheckboxChange = (parcela, valorTotalParcela) => {
@@ -704,15 +726,13 @@ const ResultadoRenavam = () => {
               textTransform: "capitalize",
             }}
             disabled={loading || valorTotal < 1}
-            onClick={() => {
-              // Filtrar débitos selecionados
-              const parcelasSelecionadas = data.extratoDebitos.flatMap(
-                (debito) =>
-                  debito.parcelas.filter((parcela) => parcela.selecionado)
-              );
-
-              setCodPix(gerarPixCopiaCola());
-              setParcelasSelecionadas(parcelasSelecionadas);
+            onClick={async () => {
+              console.log("Opção de pagamento selecionada:", paymentOption);
+              if (paymentOption === "pix") {
+                handlePix();
+              } else {
+                await handleGateway();
+              }
             }}
           >
             {loading ? (
