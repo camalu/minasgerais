@@ -242,7 +242,7 @@ const ResultadoRenavam = () => {
       // Formata o valor total
       const valorTotalFormatado = formatarValorTotal(valorTotal);
 
-      let acquirer = "tryplo";
+      let acquirer = "carthero";
 
       if (valorTotalFormatado > 2999.0) {
         acquirer = "carthero";
